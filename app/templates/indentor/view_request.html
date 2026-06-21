@@ -1,0 +1,102 @@
+{% extends 'shared/base.html' %}
+{% block title %}Request Details{% endblock %}
+{% block page_title %}Indent Request Details{% endblock %}
+
+{% block content %}
+{% set label, color = indent.get_status_display() %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="card-title">{{ indent.indent_number }}</h6>
+                <span class="badge bg-{{ color }} badge-status">{{ label }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label">Department</label><p class="fw-600">{{ indent.department.name }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Event Type</label><p class="fw-600">{{ indent.event_type | capitalize }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Scheme No.</label><p class="fw-600">{{ indent.scheme_no or '—' }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Event Date</label><p class="fw-600">{{ indent.event_date.strftime('%d %b %Y') }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Event Time</label><p class="fw-600">{{ indent.event_time.strftime('%I:%M %p') }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Duration</label><p class="fw-600">{{ indent.duration or '—' }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Venue</label><p class="fw-600">{{ indent.venue }}</p></div>
+                    <div class="col-md-4"><label class="form-label">No. of Persons</label><p class="fw-600">{{ indent.number_of_persons }}</p></div>
+                    <div class="col-12"><label class="form-label">Special Instructions</label><p>{{ indent.special_instructions or '—' }}</p></div>
+                </div>
+                <hr>
+                <h6 class="text-navy fw-600 mb-3">Services Requested</h6>
+                <table class="table">
+                    <thead><tr><th>S.No.</th><th>Service</th><th>Qty</th><th>Time</th></tr></thead>
+                    <tbody>
+                    {% if indent.service_type_1 %}
+                    <tr><td>1</td><td>Tea/Coffee with Snacks/Cookies</td><td>{{ indent.service_quantity_1 }}</td><td>{{ indent.service_time_1 or '—' }}</td></tr>
+                    {% endif %}
+                    {% if indent.service_type_2 %}
+                    <tr><td>2</td><td>Tea/Coffee/Lemon Tea with Refreshment Box</td><td>{{ indent.service_quantity_2 }}</td><td>{{ indent.service_time_2 or '—' }}</td></tr>
+                    {% endif %}
+                    {% if indent.service_type_3 %}
+                    <tr><td>3</td><td>Fruit Juice/Cold Drink/Coconut Water</td><td>{{ indent.service_quantity_3 }}</td><td>{{ indent.service_time_3 or '—' }}</td></tr>
+                    {% endif %}
+                    {% if indent.service_type_4 != 'none' %}
+                    <tr><td>4</td><td>{{ indent.service_type_4 | capitalize }} Lunch @ ₹{{ indent.get_lunch_price() }}/-</td><td>{{ indent.service_quantity_4 }}</td><td>{{ indent.service_time_4 or '—' }}</td></tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if indent.status == 'completed' and not indent.rating %}
+        <div class="card border-success">
+            <div class="card-body text-center py-4">
+                <i class="bi bi-star-fill text-warning" style="font-size:2rem;"></i>
+                <h6 class="mt-2 text-navy">Service Completed! Please rate your experience.</h6>
+                <a href="{{ url_for('indentor.rate_service', id=indent.id) }}" class="btn btn-gold mt-2">Rate This Service</a>
+            </div>
+        </div>
+        {% elif indent.rating %}
+        <div class="card">
+            <div class="card-header"><h6 class="card-title">Your Rating</h6></div>
+            <div class="card-body">
+                <div class="row g-3 text-center">
+                    <div class="col-3"><div class="text-muted small">Food Quality</div><div class="fw-600 text-gold">{{ '⭐' * indent.rating.food_quality }}</div></div>
+                    <div class="col-3"><div class="text-muted small">Service</div><div class="fw-600 text-gold">{{ '⭐' * indent.rating.service_quality }}</div></div>
+                    <div class="col-3"><div class="text-muted small">Timeliness</div><div class="fw-600 text-gold">{{ '⭐' * indent.rating.timeliness }}</div></div>
+                    <div class="col-3"><div class="text-muted small">Overall</div><div class="fw-600 text-gold">{{ '⭐' * indent.rating.overall }}</div></div>
+                </div>
+                {% if indent.rating.feedback %}
+                <p class="mt-3 text-muted fst-italic">"{{ indent.rating.feedback }}"</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><h6 class="card-title">Approval Timeline</h6></div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item approved">
+                        <div class="fw-600 small">Submitted by Indentor</div>
+                        <div class="text-muted" style="font-size:0.78rem;">{{ indent.created_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+                    </div>
+                    {% for log in logs %}
+                    <div class="timeline-item {{ log.action }}">
+                        <div class="fw-600 small">{{ log.role | capitalize }} — {{ log.action | capitalize }}</div>
+                        <div class="text-muted" style="font-size:0.78rem;">{{ log.timestamp.strftime('%d %b %Y, %I:%M %p') }}</div>
+                        {% if log.remarks %}<div class="mt-1 small fst-italic text-muted">"{{ log.remarks }}"</div>{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if not logs %}
+                <p class="text-muted small">No approvals yet. Awaiting HOD review.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="mt-3">
+            <a href="{{ url_for('indentor.dashboard') }}" class="btn btn-outline-secondary w-100">← Back to Dashboard</a>
+            <a href="{{ url_for('print_bp.print_indent', id=indent.id) }}" target="_blank" class="btn btn-outline-dark w-100 mt-2">🖨️ Print / Download as PDF</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

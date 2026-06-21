@@ -1,0 +1,77 @@
+{% extends 'shared/base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-6 col-md-2">
+        <div class="stat-card"><div class="stat-icon navy"><i class="bi bi-people-fill"></i></div><div><div class="stat-value">{{ stats.total_users }}</div><div class="stat-label">Users</div></div></div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="stat-card"><div class="stat-icon gold"><i class="bi bi-diagram-3"></i></div><div><div class="stat-value">{{ stats.total_depts }}</div><div class="stat-label">Depts</div></div></div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="stat-card"><div class="stat-icon info"><i class="bi bi-file-earmark-text"></i></div><div><div class="stat-value">{{ stats.total_requests }}</div><div class="stat-label">Requests</div></div></div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="stat-card"><div class="stat-icon warning"><i class="bi bi-hourglass-split"></i></div><div><div class="stat-value">{{ stats.pending }}</div><div class="stat-label">Pending</div></div></div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="stat-card"><div class="stat-icon success"><i class="bi bi-check2-all"></i></div><div><div class="stat-value">{{ stats.completed }}</div><div class="stat-label">Completed</div></div></div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="stat-card"><div class="stat-icon gold"><i class="bi bi-star-fill"></i></div><div><div class="stat-value">{{ stats.avg_rating }}/5</div><div class="stat-label">Avg Rating</div></div></div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card"><div class="card-body"><canvas id="statusChart" height="200"></canvas></div></div>
+    </div>
+    <div class="col-md-6">
+        <div class="card"><div class="card-body"><canvas id="deptChart" height="200"></canvas></div></div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title">Recent Requests</h6>
+        <a href="{{ url_for('admin.reports') }}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body p-0">
+        <table class="table mb-0">
+            <thead><tr><th>Indent No.</th><th>Indentor</th><th>Dept.</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for r in recent_requests %}
+            {% set label, color = r.get_status_display() %}
+            <tr>
+                <td class="fw-600">{{ r.indent_number }}</td>
+                <td>{{ r.indentor.name }}</td>
+                <td>{{ r.department.name }}</td>
+                <td>{{ r.event_date.strftime('%d %b %Y') }}</td>
+                <td><span class="badge bg-{{ color }} badge-status">{{ label }}</span></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+fetch('/admin/analytics/data').then(r=>r.json()).then(data=>{
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: { labels: data.status.labels, datasets: [{ data: data.status.data, backgroundColor: ['#c8a84b','#16a34a','#dc2626','#0284c7','#9ca3af','#0f2c5c','#d97706','#6b7280'] }] },
+        options: { plugins: { title: { display: true, text: 'Requests by Status' } }, responsive: true }
+    });
+    new Chart(document.getElementById('deptChart'), {
+        type: 'bar',
+        data: { labels: data.departments.labels, datasets: [{ label: 'Requests', data: data.departments.data, backgroundColor: '#0f2c5c' }] },
+        options: { plugins: { title: { display: true, text: 'Requests per Department' } }, responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+});
+</script>
+{% endblock %}

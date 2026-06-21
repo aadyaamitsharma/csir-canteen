@@ -1,0 +1,86 @@
+{% extends 'shared/base.html' %}
+{% block title %}Indentor Dashboard{% endblock %}
+{% block page_title %}My Indent Requests{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon navy"><i class="bi bi-file-earmark-text"></i></div>
+            <div><div class="stat-value">{{ stats.total }}</div><div class="stat-label">Total Requests</div></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon warning"><i class="bi bi-hourglass-split"></i></div>
+            <div><div class="stat-value">{{ stats.pending }}</div><div class="stat-label">Pending</div></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon success"><i class="bi bi-check2-all"></i></div>
+            <div><div class="stat-value">{{ stats.completed }}</div><div class="stat-label">Completed</div></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon danger"><i class="bi bi-x-circle"></i></div>
+            <div><div class="stat-value">{{ stats.rejected }}</div><div class="stat-label">Rejected</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- Requests Table -->
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title">All Indent Requests</h6>
+        <a href="{{ url_for('indentor.create_indent') }}" class="btn btn-navy btn-sm">
+            <i class="bi bi-plus-lg me-1"></i>New Indent
+        </a>
+    </div>
+    <div class="card-body p-0">
+        {% if requests %}
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead><tr>
+                    <th>Indent No.</th>
+                    <th>Event Type</th>
+                    <th>Venue</th>
+                    <th>Event Date</th>
+                    <th>Persons</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr></thead>
+                <tbody>
+                {% for r in requests %}
+                {% set label, color = r.get_status_display() %}
+                <tr>
+                    <td><span class="fw-600 text-navy">{{ r.indent_number }}</span></td>
+                    <td>{{ r.event_type | capitalize }}</td>
+                    <td>{{ r.venue }}</td>
+                    <td>{{ r.event_date.strftime('%d %b %Y') }}</td>
+                    <td>{{ r.number_of_persons }}</td>
+                    <td><span class="badge bg-{{ color }} badge-status">{{ label }}</span></td>
+                    <td>
+                        <a href="{{ url_for('indentor.view_request', id=r.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                        <a href="{{ url_for('print_bp.print_indent', id=r.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary" title="Print / Download">🖨️</a>
+                        {% if r.status == 'completed' and not r.rating %}
+                        <a href="{{ url_for('indentor.rate_service', id=r.id) }}" class="btn btn-sm btn-gold">Rate</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size:3rem; color:var(--gray-200);"></i>
+            <p class="mt-3 text-muted">No indent requests yet.</p>
+            <a href="{{ url_for('indentor.create_indent') }}" class="btn btn-navy mt-2">Create First Indent</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indent Form — {{ indent.indent_number }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12px;
+            background: #fff;
+            color: #000;
+            padding: 20px;
+        }
+
+        /* ── PRINT CONTROLS (hidden when printing) ── */
+        .print-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        .btn-print {
+            background: #0f2c5c;
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-weight: 600;
+        }
+        .btn-back {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            font-size: 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-print:hover { background: #1a3f7a; }
+        .btn-back:hover { background: #4b5563; }
+
+        /* ── FORM WRAPPER ── */
+        .form-wrapper {
+            max-width: 780px;
+            margin: 0 auto;
+            border: 2px solid #000;
+        }
+
+        /* ── HEADER ── */
+        .form-header {
+            border-bottom: 2px solid #000;
+            padding: 10px 16px;
+        }
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-logo {
+            font-size: 36px;
+            line-height: 1;
+        }
+        .header-text { flex: 1; text-align: center; }
+        .header-text .hindi {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        .header-text .english {
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .header-text .address {
+            font-size: 10px;
+            margin-top: 2px;
+        }
+        .header-subtitle {
+            text-align: center;
+            font-size: 11px;
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid #000;
+        }
+
+        /* ── FORM TYPE CHECKBOXES ── */
+        .form-type-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 16px;
+            border-bottom: 1px solid #000;
+            font-size: 11px;
+        }
+        .form-type-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+        }
+        .checkbox-box {
+            width: 14px; height: 14px;
+            border: 1.5px solid #000;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* ── MAIN TABLE ── */
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .main-table td, .main-table th {
+            border: 1px solid #000;
+            padding: 5px 8px;
+            vertical-align: top;
+        }
+        .main-table th {
+            background: #f5f5f5;
+            font-weight: bold;
+            text-align: center;
+        }
+        .label-cell {
+            font-size: 10px;
+            color: #333;
+            display: block;
+            margin-bottom: 1px;
+        }
+        .value-cell {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* ── META ROW ── */
+        .meta-row { border-bottom: 1px solid #000; }
+        .meta-row td { border: none; border-right: 1px solid #000; padding: 6px 10px; }
+        .meta-row td:last-child { border-right: none; }
+
+        /* ── EVENT ROW ── */
+        .event-row { border-bottom: 1px solid #000; }
+        .event-row td { border: none; border-right: 1px solid #000; padding: 6px 10px; }
+        .event-row td:last-child { border-right: none; }
+
+        /* ── SERVICES TABLE ── */
+        .services-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .services-table th {
+            border: 1px solid #000;
+            padding: 5px 8px;
+            background: #f0f0f0;
+            font-size: 11px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .services-table td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            font-size: 11px;
+            vertical-align: middle;
+        }
+        .services-table .sno { text-align: center; font-weight: bold; }
+        .service-hindi { font-size: 11px; font-weight: bold; }
+        .service-english { font-size: 10px; color: #333; }
+        .tick { text-align: center; font-size: 14px; }
+        .not-selected { color: #999; text-align: center; }
+
+        /* ── SPECIAL INSTRUCTIONS ── */
+        .instructions-row { border-top: 1px solid #000; }
+        .instructions-row td { padding: 6px 10px; }
+
+        /* ── SIGNATURE ROW ── */
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-top: 2px solid #000;
+        }
+        .signature-table td {
+            border-right: 1px solid #000;
+            padding: 10px;
+            width: 25%;
+            vertical-align: top;
+            min-height: 80px;
+        }
+        .signature-table td:last-child { border-right: none; }
+        .sig-title { font-size: 10px; font-weight: bold; margin-bottom: 2px; }
+        .sig-subtitle { font-size: 9px; color: #444; margin-bottom: 8px; }
+        .sig-name { font-size: 11px; font-weight: bold; margin-top: 30px; }
+        .sig-desig { font-size: 10px; }
+        .sig-dept { font-size: 10px; color: #555; }
+
+        /* ── APPROVAL SECTION ── */
+        .approval-section {
+            border-top: 1px solid #000;
+            padding: 6px 10px;
+        }
+        .approval-title {
+            font-weight: bold;
+            font-size: 11px;
+            margin-bottom: 6px;
+            text-align: center;
+            background: #f0f0f0;
+            padding: 3px;
+        }
+        .approval-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+        .approval-table td, .approval-table th {
+            border: 1px solid #000;
+            padding: 4px 8px;
+        }
+        .approved-stamp {
+            display: inline-block;
+            border: 2px solid green;
+            color: green;
+            padding: 2px 8px;
+            font-weight: bold;
+            font-size: 11px;
+            border-radius: 3px;
+        }
+        .rejected-stamp {
+            display: inline-block;
+            border: 2px solid red;
+            color: red;
+            padding: 2px 8px;
+            font-weight: bold;
+            font-size: 11px;
+            border-radius: 3px;
+        }
+        .pending-stamp {
+            display: inline-block;
+            border: 2px solid #d97706;
+            color: #d97706;
+            padding: 2px 8px;
+            font-weight: bold;
+            font-size: 11px;
+            border-radius: 3px;
+        }
+
+        /* ── STATUS WATERMARK ── */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 80px;
+            font-weight: bold;
+            opacity: 0.04;
+            color: #000;
+            pointer-events: none;
+            z-index: 9999;
+            white-space: nowrap;
+        }
+
+        /* ── PRINT STYLES ── */
+        @media print {
+            body { padding: 0; }
+            .print-controls { display: none !important; }
+            .form-wrapper { border: 2px solid #000; max-width: 100%; }
+            @page {
+                size: A4;
+                margin: 10mm 12mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Watermark based on status -->
+{% if indent.status == 'completed' %}
+<div class="watermark">COMPLETED</div>
+{% elif 'rejected' in indent.status %}
+<div class="watermark">REJECTED</div>
+{% endif %}
+
+<!-- Print Controls (hidden on print) -->
+<div class="print-controls">
+    <button class="btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <a href="javascript:history.back()" class="btn-back">← Go Back</a>
+</div>
+
+<!-- OFFICIAL FORM -->
+<div class="form-wrapper">
+
+    <!-- Header -->
+    <div class="form-header">
+        <div class="header-top">
+            <div class="header-logo">🏛️</div>
+            <div class="header-text">
+                <div class="hindi">सीएसआईआर – केंद्रीय सड़क अनुसंधान संस्थान</div>
+                <div class="english">CSIR – Central Road Research Institute</div>
+                <div class="address">दिल्ली–मथुरा मार्ग, नई दिल्ली–110025 &nbsp;|&nbsp; Delhi–Mathura Road, New Delhi–110025</div>
+            </div>
+        </div>
+        <div class="header-subtitle">
+            सीएसआईआर सीआरआरआई गेस्ट हाउस और कैंटीन ऑर्डर फॉर्म &nbsp;|&nbsp;
+            CSIR CRRI Guest House and Canteen Order Form
+        </div>
+    </div>
+
+    <!-- Guesthouse / Canteen checkboxes -->
+    <div class="form-type-row">
+        <div class="form-type-item">
+            GUESTHOUSE &nbsp;<div class="checkbox-box"></div>
+        </div>
+        <div style="font-weight:bold; font-size:12px; color:#0f2c5c;">
+            Indent No.: {{ indent.indent_number }}
+        </div>
+        <div class="form-type-item">
+            CANTEEN &nbsp;<div class="checkbox-box">✓</div>
+        </div>
+    </div>
+
+    <!-- Meta Row: Division / Date / Scheme No -->
+    <table class="main-table">
+        <tr class="meta-row" style="border-bottom:1px solid #000;">
+            <td style="width:33%; border:none; border-right:1px solid #000; padding:6px 10px;">
+                <span class="label-cell">डिवीजन / Division</span>
+                <span class="value-cell">{{ indent.department.name }}</span>
+            </td>
+            <td style="width:34%; border:none; border-right:1px solid #000; padding:6px 10px;">
+                <span class="label-cell">आदेश की तिथि / Date of Order</span>
+                <span class="value-cell">{{ indent.created_at.strftime('%d-%m-%Y') }}</span>
+            </td>
+            <td style="width:33%; border:none; padding:6px 10px;">
+                <span class="label-cell">योजना संख्या / Scheme No.</span>
+                <span class="value-cell">{{ indent.scheme_no or '—' }}</span>
+            </td>
+        </tr>
+
+        <!-- Event Type Row -->
+        <tr style="border-bottom:1px solid #000;">
+            <td colspan="2" style="border:none; border-right:1px solid #000; padding:6px 10px;">
+                <span class="label-cell">बैठक / संगोष्ठी / सम्मेलन / प्रशिक्षण पाठ्यक्रम</span>
+                <span class="label-cell">Meeting / Seminar / Conference / Training Programme</span>
+                <span class="value-cell">
+                    {% if indent.event_type == 'meeting' %}✓ Meeting / बैठक
+                    {% elif indent.event_type == 'seminar' %}✓ Seminar / संगोष्ठी
+                    {% elif indent.event_type == 'conference' %}✓ Conference / सम्मेलन
+                    {% elif indent.event_type == 'training' %}✓ Training Programme / प्रशिक्षण
+                    {% else %}✓ {{ indent.event_type | capitalize }}
+                    {% endif %}
+                    {% if indent.event_description %} — {{ indent.event_description }}{% endif %}
+                </span>
+            </td>
+            <td style="border:none; padding:6px 10px;">
+                <span class="label-cell">अवधि / Duration</span>
+                <span class="value-cell">{{ indent.duration or '—' }}</span>
+            </td>
+        </tr>
+
+        <!-- Venue / Date / Time / Persons -->
+        <tr style="border-bottom:1px solid #000;">
+            <td style="border:none; border-right:1px solid #000; padding:6px 10px;">
+                <span class="label-cell">स्थान / Venue</span>
+                <span class="value-cell">{{ indent.venue }}</span>
+            </td>
+            <td style="border:none; border-right:1px solid #000; padding:6px 10px;">
+                <span class="label-cell">दिनांक / Event Date</span>
+                <span class="value-cell">{{ indent.event_date.strftime('%d-%m-%Y') }}</span>
+                <br>
+                <span class="label-cell" style="margin-top:4px;">समय / Time</span>
+                <span class="value-cell">{{ indent.event_time.strftime('%I:%M %p') }}</span>
+            </td>
+            <td style="border:none; padding:6px 10px;">
+                <span class="label-cell">व्यक्तियों की संख्या / No. of Persons</span>
+                <span class="value-cell" style="font-size:16px;">{{ indent.number_of_persons }}</span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Services Table -->
+    <table class="services-table">
+        <thead>
+            <tr>
+                <th style="width:6%;">क्रम सं.<br>S.No.</th>
+                <th style="width:44%;">मांग की गई सेवाओं का विवरण<br>Details of the Services Required</th>
+                <th style="width:8%;">✓</th>
+                <th style="width:12%;">मात्रा<br>Quantity</th>
+                <th style="width:18%;">दिनांक और समय<br>Date & Time</th>
+                <th style="width:12%;">स्थान<br>Place</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Service 1 -->
+            <tr>
+                <td class="sno">1</td>
+                <td>
+                    <div class="service-hindi">चाय/कॉफी के साथ नाश्ता / कुकीज़</div>
+                    <div class="service-english">Tea/Coffee with Snacks/Cookies</div>
+                </td>
+                <td class="tick">
+                    {% if indent.service_type_1 %}<strong>✓</strong>{% else %}<span class="not-selected">—</span>{% endif %}
+                </td>
+                <td style="text-align:center;">
+                    {% if indent.service_type_1 %}{{ indent.service_quantity_1 }}{% else %}—{% endif %}
+                </td>
+                <td style="text-align:center;">
+                    {% if indent.service_type_1 and indent.service_time_1 %}{{ indent.service_time_1 }}{% else %}—{% endif %}
+                </td>
+                <td style="text-align:center;">
+                    {% if indent.service_type_1 %}{{ indent.venue }}{% else %}—{% endif %}
+                </td>
+            </tr>
+
+            <!-- Service 2 -->
+            <tr>
+                <td class="sno">2</td>
+                <td>
+                    <div class="service-hindi">चाय/कॉफी/नींबू चाय के साथ नाश्ता/स्नैक्स बॉक्स</div>
+                    <div class="service-english">Tea / Coffee / Lemon Tea with Refreshment Box</div>
+                </td>
+                <td class="tick">
+                    {% if indent.service_type_2 %}<strong>✓</strong>{% else %}<span class="not-selected">—</span>{% endif %}
+                </td>
+                <td style="text-align:center;">
+                    {% if indent.service_type_2 %}{{ indent.service_quantity_2 }}{% else %}—{% endif %}
+                </td>
+                <td style="text-align:center;">
+                    {% if indent.service_type_2 and indent.service_time_2 %}{{ indent.service_time_2 }}{% else %}—{% endif %}
+                </td>
+                <td style="text-align:center;">
+                    {% if indent.service_type_2 %}{{ indent.venue }}{% else %}—{% endif %}
+                </td>
+            </tr>
+
+            <!-- Service 3 -->
+            <tr>
+                <td class="sno">3</td>
+                <td>
+                    <div class="service-hindi">फलजूस / शीत पेय / नारियल पानी/नींबू पानी आदि</div>
+                    <div class="service-english">Fruit Juice / Cold Drink / Coconut Water / Lemon Water etc.</div>
+                </td>
+                <td class="tick">
+                    {% if indent.service_type_3 %}<strong>✓</strong>{% else %}<span class="not-selected">—</span>{% endif %}
+                </td>
+                <td style="text-align:center;">
+                    {% if indent.service_type_3 %}{{ indent.service_quantity_3 }}{% else %}—{% endif %}
+                </td>
+                <td style="text-align:center;">
+                    {% if indent.service_type_3 and indent.service_time_3 %}{{ indent.service_time_3 }}{% else %}—{% endif %}
+                </td>
+                <td style="text-align:center;">
+                    {% if indent.service_type_3 %}{{ indent.venue }}{% else %}—{% endif %}
+                </td>
+            </tr>
+
+            <!-- Service 4 -->
+            <tr>
+                <td class="sno">4</td>
+                <td>
+                    <div class="service-hindi">सामान्य / नियमित / विशेष / कार्यकारी भोजन</div>
+                    <div class="service-english">
+                        Working @Rs.90/- &nbsp;/&nbsp;
+                        Regular @Rs.150/- &nbsp;/&nbsp;
+                        Special @Rs.200/- &nbsp;/&nbsp;
+                        Executive @Rs.275/-
+                    </div>
+                    {% if indent.service_type_4 != 'none' %}
+                    <div style="margin-top:3px; font-weight:bold; font-size:11px;">
+                        ✓ Selected: {{ indent.service_type_4 | capitalize }} Lunch @ ₹{{ indent.get_lunch_price() }}/-
+                    </div>
+                    {% endif %}
+                </td>
+                <td class="tick">
+                    {% if indent.service_type_4 != 'none' %}<strong>✓</strong>{% else %}<span class="not-selected">—</span>{% endif %}
+                </td>
+                <td style="text-align:center;">
+                    {% if indent.service_type_4 != 'none' %}{{ indent.service_quantity_4 }}{% else %}—{% endif %}
+                </td>
+                <td style="text-align:center;">
+                    {% if indent.service_type_4 != 'none' and indent.service_time_4 %}{{ indent.service_time_4 }}{% else %}—{% endif %}
+                </td>
+                <td style="text-align:center;">
+                    {% if indent.service_type_4 != 'none' %}{{ indent.venue }}{% else %}—{% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Special Instructions -->
+    <table class="main-table">
+        <tr>
+            <td style="border:none; border-top:1px solid #000; padding:6px 10px;">
+                <span class="label-cell">विशेष निर्देश / Special Instructions</span>
+                <span class="value-cell">{{ indent.special_instructions or 'None' }}</span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Approval History -->
+    {% if logs %}
+    <div class="approval-section">
+        <div class="approval-title">Approval History / अनुमोदन इतिहास</div>
+        <table class="approval-table">
+            <thead>
+                <tr>
+                    <th>Role / पद</th>
+                    <th>Name / नाम</th>
+                    <th>Action / कार्रवाई</th>
+                    <th>Date & Time / दिनांक</th>
+                    <th>Remarks / टिप्पणी</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.role | capitalize }}</td>
+                <td>{{ log.approver.name }}<br><small>{{ log.approver.designation or '' }}</small></td>
+                <td>
+                    {% if log.action == 'approved' %}
+                    <span class="approved-stamp">APPROVED</span>
+                    {% elif log.action == 'rejected' %}
+                    <span class="rejected-stamp">REJECTED</span>
+                    {% elif log.action == 'in_progress' %}
+                    <span class="pending-stamp">IN PROGRESS</span>
+                    {% elif log.action == 'completed' %}
+                    <span class="approved-stamp">COMPLETED</span>
+                    {% endif %}
+                </td>
+                <td>{{ log.timestamp.strftime('%d-%m-%Y %I:%M %p') }}</td>
+                <td>{{ log.remarks or '—' }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Signature Row -->
+    <table class="signature-table">
+        <tr>
+            <td>
+                <div class="sig-title">मांगकर्ता के हस्ताक्षर</div>
+                <div class="sig-subtitle">Name, designation & Signature of Indentor With STAMP</div>
+                <div class="sig-name">{{ indent.indentor.name }}</div>
+                <div class="sig-desig">{{ indent.indentor.designation or '' }}</div>
+                <div class="sig-dept">{{ indent.department.name }}</div>
+            </td>
+            <td>
+                <div class="sig-title">प्रमुख के हस्ताक्षर</div>
+                <div class="sig-subtitle">Name, designation & Signature of HoD With STAMP</div>
+                {% for log in logs if log.role == 'hod' %}
+                <div class="sig-name">{{ log.approver.name }}</div>
+                <div class="sig-desig">{{ log.approver.designation or 'Head of Department' }}</div>
+                <div class="sig-dept" style="color:{% if log.action=='approved' %}green{% else %}red{% endif %}">
+                    {{ log.action | upper }} — {{ log.timestamp.strftime('%d-%m-%Y') }}
+                </div>
+                {% else %}
+                <div style="margin-top:30px; color:#999; font-size:10px; font-style:italic;">Awaiting HOD Approval</div>
+                {% endfor %}
+            </td>
+            <td>
+                <div class="sig-title">अध्यक्ष अतिथि गृह एवं कैंटीन</div>
+                <div class="sig-subtitle">Chairman, GH & Canteen With STAMP</div>
+                {% for log in logs if log.role == 'chairman' %}
+                <div class="sig-name">{{ log.approver.name }}</div>
+                <div class="sig-desig">{{ log.approver.designation or 'Chairman' }}</div>
+                <div class="sig-dept" style="color:{% if log.action=='approved' %}green{% else %}red{% endif %}">
+                    {{ log.action | upper }} — {{ log.timestamp.strftime('%d-%m-%Y') }}
+                </div>
+                {% else %}
+                <div style="margin-top:30px; color:#999; font-size:10px; font-style:italic;">Awaiting Chairman Approval</div>
+                {% endfor %}
+            </td>
+            <td>
+                <div class="sig-title">प्रबंधक अतिथि गृह एवं कैंटीन</div>
+                <div class="sig-subtitle">Manager GH & Canteen</div>
+                {% for log in logs if log.role == 'manager' %}
+                <div class="sig-name">{{ log.approver.name }}</div>
+                <div class="sig-desig">{{ log.approver.designation or 'Manager' }}</div>
+                <div class="sig-dept" style="color:{% if log.action=='completed' %}green{% else %}blue{% endif %}">
+                    {{ log.action | upper }} — {{ log.timestamp.strftime('%d-%m-%Y') }}
+                </div>
+                {% else %}
+                <div style="margin-top:30px; color:#999; font-size:10px; font-style:italic;">Awaiting Service</div>
+                {% endfor %}
+            </td>
+        </tr>
+    </table>
+
+    <!-- Footer -->
+    <div style="text-align:center; padding:5px; border-top:1px solid #000; font-size:9px; color:#555;">
+        Generated on {{ now.strftime('%d-%m-%Y at %I:%M %p') if now else '' }} &nbsp;|&nbsp;
+        Status: <strong>{{ indent.get_status_display()[0] }}</strong> &nbsp;|&nbsp;
+        CSIR-CRRI Canteen Management System
+    </div>
+
+</div>
+
+</body>
+</html>

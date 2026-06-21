@@ -1,0 +1,85 @@
+{% extends 'shared/base.html' %}
+{% block title %}Chairman Review{% endblock %}
+{% block page_title %}Chairman — Review Request{% endblock %}
+
+{% block content %}
+{% set label, color = indent.get_status_display() %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="card-title">{{ indent.indent_number }}</h6>
+                <span class="badge bg-{{ color }}">{{ label }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label">Indentor</label><p class="fw-600">{{ indent.indentor.name }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Department</label><p class="fw-600">{{ indent.department.name }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Event Type</label><p class="fw-600">{{ indent.event_type | capitalize }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Event Date</label><p class="fw-600">{{ indent.event_date.strftime('%d %b %Y') }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Time</label><p class="fw-600">{{ indent.event_time.strftime('%I:%M %p') }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Venue</label><p class="fw-600">{{ indent.venue }}</p></div>
+                    <div class="col-md-4"><label class="form-label">No. of Persons</label><p class="fw-600">{{ indent.number_of_persons }}</p></div>
+                    <div class="col-12"><label class="form-label">Special Instructions</label><p>{{ indent.special_instructions or '—' }}</p></div>
+                </div>
+                <hr>
+                <h6 class="text-navy mb-3">Services Required</h6>
+                <ul class="list-group list-group-flush">
+                {% if indent.service_type_1 %}<li class="list-group-item">✅ Tea/Coffee with Snacks — Qty: {{ indent.service_quantity_1 }}</li>{% endif %}
+                {% if indent.service_type_2 %}<li class="list-group-item">✅ Tea/Coffee with Refreshment Box — Qty: {{ indent.service_quantity_2 }}</li>{% endif %}
+                {% if indent.service_type_3 %}<li class="list-group-item">✅ Fruit Juice/Cold Drink — Qty: {{ indent.service_quantity_3 }}</li>{% endif %}
+                {% if indent.service_type_4 != 'none' %}<li class="list-group-item">✅ {{ indent.service_type_4 | capitalize }} Lunch @ ₹{{ indent.get_lunch_price() }}/- — Qty: {{ indent.service_quantity_4 }}</li>{% endif %}
+                </ul>
+            </div>
+        </div>
+
+        {% if indent.status == 'hod_approved' %}
+        <div class="card">
+            <div class="card-header"><h6 class="card-title">Chairman Decision</h6></div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Remarks</label>
+                    <textarea id="remarks" class="form-control" rows="3" placeholder="Add your remarks..."></textarea>
+                </div>
+                <div class="d-flex gap-3">
+                    <form method="POST" class="flex-fill">
+                        <input type="hidden" name="action" value="approve">
+                        <input type="hidden" name="remarks" id="remarksApprove">
+                        <button type="submit" class="btn btn-success w-100" onclick="document.getElementById('remarksApprove').value=document.getElementById('remarks').value">
+                            <i class="bi bi-check2-circle me-2"></i>Approve & Send to Manager
+                        </button>
+                    </form>
+                    <form method="POST" class="flex-fill">
+                        <input type="hidden" name="action" value="reject">
+                        <input type="hidden" name="remarks" id="remarksReject">
+                        <button type="submit" class="btn btn-danger w-100" onclick="document.getElementById('remarksReject').value=document.getElementById('remarks').value">
+                            <i class="bi bi-x-circle me-2"></i>Reject
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><h6 class="card-title">Approval History</h6></div>
+            <div class="card-body">
+                <div class="timeline">
+                <div class="timeline-item approved"><div class="fw-600 small">Submitted</div><div class="text-muted" style="font-size:0.78rem;">{{ indent.created_at.strftime('%d %b %Y') }}</div></div>
+                {% for log in logs %}
+                <div class="timeline-item {{ log.action }}">
+                    <div class="fw-600 small">{{ log.role|capitalize }}: {{ log.action|capitalize }}</div>
+                    <div class="text-muted" style="font-size:0.78rem;">{{ log.timestamp.strftime('%d %b %Y, %I:%M %p') }}</div>
+                    {% if log.remarks %}<div class="small fst-italic">"{{ log.remarks }}"</div>{% endif %}
+                </div>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="mt-3"><a href="{{ url_for('chairman.dashboard') }}" class="btn btn-outline-secondary w-100">← Back</a>
+        <a href="{{ url_for('print_bp.print_indent', id=indent.id) }}" target="_blank" class="btn btn-outline-dark w-100 mt-2">🖨️ Print / Download as PDF</a></div>
+    </div>
+</div>
+{% endblock %}

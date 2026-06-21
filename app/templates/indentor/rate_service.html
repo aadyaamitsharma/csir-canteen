@@ -1,0 +1,53 @@
+{% extends 'shared/base.html' %}
+{% block title %}Rate Service{% endblock %}
+{% block page_title %}Rate Service{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-lg-6">
+<div class="card">
+    <div class="card-header"><h6 class="card-title">Rate Service — {{ indent.indent_number }}</h6></div>
+    <div class="card-body">
+        <form method="POST">
+            {% for field, label in [('food_quality','Food Quality'), ('service_quality','Service Quality'), ('timeliness','Timeliness'), ('overall','Overall Experience')] %}
+            <div class="mb-4">
+                <label class="form-label">{{ label }}</label>
+                <div class="d-flex gap-2">
+                    {% for i in range(1,6) %}
+                    <div>
+                        <input type="radio" name="{{ field }}" id="{{ field }}_{{ i }}" value="{{ i }}" class="d-none" required>
+                        <label for="{{ field }}_{{ i }}" class="star-btn" data-val="{{ i }}" data-group="{{ field }}"
+                               style="font-size:2rem;cursor:pointer;color:var(--gray-200);">★</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+            <div class="mb-4">
+                <label class="form-label">Feedback / Comments</label>
+                <textarea name="feedback" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-navy flex-fill">Submit Rating</button>
+                <a href="{{ url_for('indentor.view_request', id=indent.id) }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+</div>
+<script>
+document.querySelectorAll('.star-btn').forEach(btn => {
+    btn.addEventListener('mouseover', function() {
+        const g = this.dataset.group, v = parseInt(this.dataset.val);
+        document.querySelectorAll(`[data-group="${g}"]`).forEach(b => {
+            b.style.color = parseInt(b.dataset.val) <= v ? 'var(--gold)' : 'var(--gray-200)';
+        });
+    });
+    btn.addEventListener('click', function() {
+        const g = this.dataset.group, v = parseInt(this.dataset.val);
+        document.querySelector(`input[name="${g}"][value="${v}"]`).checked = true;
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CSIR-CRRI Canteen Management{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-logo">
+            <i class="bi bi-building-fill-check"></i>
+        </div>
+        <div class="brand-text">
+            <span class="brand-title">CSIR-CRRI</span>
+            <span class="brand-sub">Canteen System</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        {% if current_user.role == 'indentor' %}
+        <a href="{{ url_for('indentor.dashboard') }}" class="nav-link {% if request.endpoint == 'indentor.dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a href="{{ url_for('indentor.create_indent') }}" class="nav-link {% if request.endpoint == 'indentor.create_indent' %}active{% endif %}">
+            <i class="bi bi-plus-circle-fill"></i> New Indent
+        </a>
+        {% elif current_user.role == 'hod' %}
+        <a href="{{ url_for('hod.dashboard') }}" class="nav-link {% if request.endpoint == 'hod.dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        {% elif current_user.role == 'chairman' %}
+        <a href="{{ url_for('chairman.dashboard') }}" class="nav-link {% if request.endpoint == 'chairman.dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        {% elif current_user.role == 'manager' %}
+        <a href="{{ url_for('manager.dashboard') }}" class="nav-link {% if request.endpoint == 'manager.dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        {% elif current_user.role == 'admin' %}
+        <a href="{{ url_for('admin.dashboard') }}" class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a href="{{ url_for('admin.users') }}" class="nav-link {% if request.endpoint == 'admin.users' %}active{% endif %}">
+            <i class="bi bi-people-fill"></i> Users
+        </a>
+        <a href="{{ url_for('admin.departments') }}" class="nav-link {% if request.endpoint == 'admin.departments' %}active{% endif %}">
+            <i class="bi bi-diagram-3-fill"></i> Departments
+        </a>
+        <a href="{{ url_for('admin.reports') }}" class="nav-link {% if request.endpoint == 'admin.reports' %}active{% endif %}">
+            <i class="bi bi-file-earmark-bar-graph-fill"></i> Reports
+        </a>
+        <a href="{{ url_for('admin.analytics') }}" class="nav-link {% if request.endpoint == 'admin.analytics' %}active{% endif %}">
+            <i class="bi bi-graph-up-arrow"></i> Analytics
+        </a>
+        {% endif %}
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="{{ url_for('auth.profile') }}" class="nav-link">
+            <i class="bi bi-person-circle"></i> Profile
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content" id="mainContent">
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="navbar-info">
+            <span class="page-title">{% block page_title %}Dashboard{% endblock %}</span>
+        </div>
+        <div class="navbar-user">
+            <div class="notif-bell" id="notifBell">
+                <i class="bi bi-bell-fill"></i>
+                <span class="notif-badge" id="notifCount" style="display:none;"></span>
+            </div>
+            <div class="user-chip">
+                <div class="user-avatar">{{ current_user.name[0].upper() }}</div>
+                <div>
+                    <div class="user-name">{{ current_user.name }}</div>
+                    <div class="user-role">{{ current_user.role | capitalize }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="page-body">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for cat, msg in messages %}
+            <div class="alert alert-{{ cat }} alert-dismissible fade show" role="alert">
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+{% else %}
+{% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Sidebar toggle
+    const toggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const main = document.getElementById('mainContent');
+    if(toggle) {
+        toggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            main.classList.toggle('expanded');
+        });
+    }
+    // Notifications
+    fetch('/api/notifications').then(r => r.json()).then(d => {
+        if(d.count > 0) {
+            const badge = document.getElementById('notifCount');
+            if(badge) { badge.textContent = d.count; badge.style.display = 'inline-block'; }
+        }
+    }).catch(()=>{});
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,55 @@
+{% extends 'shared/base.html' %}
+{% block title %}Departments{% endblock %}
+{% block page_title %}Department Management{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header"><h6 class="card-title">Add Department</h6></div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.create_department') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Department Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Traffic Engineering" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Department Code</label>
+                        <input type="text" name="code" class="form-control" placeholder="e.g. TE" required>
+                    </div>
+                    <button type="submit" class="btn btn-navy w-100">Add Department</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header"><h6 class="card-title">All Departments ({{ departments|length }})</h6></div>
+            <div class="card-body p-0">
+                <table class="table mb-0">
+                    <thead><tr><th>#</th><th>Name</th><th>Code</th><th>Users</th><th>Requests</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for d in departments %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td class="fw-600">{{ d.name }}</td>
+                        <td><span class="badge bg-secondary">{{ d.code }}</span></td>
+                        <td>{{ d.users|length }}</td>
+                        <td>{{ d.indent_requests|length }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin.delete_department', id=d.id) }}" class="d-inline" onsubmit="return confirm('Delete department?')">
+                                <button class="btn btn-sm btn-outline-danger" {% if d.users|length > 0 or d.indent_requests|length > 0 %}disabled title="Cannot delete — has users or requests"{% endif %}>Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not departments %}
+                    <tr><td colspan="6" class="text-center py-4 text-muted">No departments yet.</td></tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

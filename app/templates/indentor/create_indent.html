@@ -1,0 +1,222 @@
+{% extends 'shared/base.html' %}
+{% block title %}New Indent Request{% endblock %}
+{% block page_title %}Create New Indent{% endblock %}
+
+{% block content %}
+<div class="indent-form-wrapper">
+    <!-- CSIR Header -->
+    <div class="indent-form-header">
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;">
+            <div style="font-size:2rem;">🏛️</div>
+            <div>
+                <h5>सीएसआईआर – केंद्रीय सड़क अनुसंधान संस्थान</h5>
+                <h5>CSIR – Central Road Research Institute</h5>
+                <p>दिल्ली–मथुरा मार्ग, नई दिल्ली–110025 | Delhi–Mathura Road, New Delhi–110025</p>
+                <p style="font-size:0.7rem;opacity:0.6;margin-top:4px;">सीएसआईआर सीआरआरआई गेस्ट हाउस और कैंटीन ऑर्डर फॉर्म | CSIR CRRI Guest House and Canteen Order Form</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('indentor.create_indent') }}" id="indentForm">
+        <!-- Top meta row -->
+        <table class="indent-table">
+            <tr>
+                <td width="33%">
+                    <label class="form-label">डिवीजन / Division</label>
+                    <select name="department_id" class="form-select form-select-sm" required>
+                        {% for d in departments %}
+                        <option value="{{ d.id }}" {% if current_user.department_id == d.id %}selected{% endif %}>{{ d.name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td width="33%">
+                    <label class="form-label">आदेश की तिथि / Date of Order</label>
+                    <input type="date" name="order_date" class="form-control form-control-sm" value="{{ today }}" readonly style="background:#f8f9fa;">
+                </td>
+                <td width="33%">
+                    <label class="form-label">योजना संख्या / Scheme No.</label>
+                    <input type="text" name="scheme_no" class="form-control form-control-sm" placeholder="Optional">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <label class="form-label">बैठक / संगोष्ठी / सम्मेलन / प्रशिक्षण | Meeting / Seminar / Conference / Training</label>
+                    <select name="event_type" class="form-select form-select-sm" required>
+                        <option value="meeting">Meeting / बैठक</option>
+                        <option value="seminar">Seminar / संगोष्ठी</option>
+                        <option value="conference">Conference / सम्मेलन</option>
+                        <option value="training">Training / प्रशिक्षण</option>
+                        <option value="other">Other / अन्य</option>
+                    </select>
+                </td>
+                <td>
+                    <label class="form-label">अवधि / Duration</label>
+                    <input type="text" name="duration" class="form-control form-control-sm" placeholder="e.g. 2 hours">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="form-label">Event Description</label>
+                    <input type="text" name="event_description" class="form-control form-control-sm" placeholder="Brief description">
+                </td>
+                <td>
+                    <label class="form-label">स्थान / Venue</label>
+                    <input type="text" name="venue" class="form-control form-control-sm" placeholder="Conference Hall, Room No..." required>
+                </td>
+                <td>
+                    <label class="form-label">व्यक्तियों की संख्या / No. of Persons</label>
+                    <input type="number" name="number_of_persons" class="form-control form-control-sm" min="1" value="10" required>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label class="form-label">कार्यक्रम तिथि / Event Date</label>
+                    <input type="date" name="event_date" class="form-control form-control-sm" required>
+                </td>
+                <td>
+                    <label class="form-label">समय / Time</label>
+                    <input type="time" name="event_time" class="form-control form-control-sm" required>
+                </td>
+                <td></td>
+            </tr>
+        </table>
+
+        <!-- Services Table -->
+        <table class="indent-table">
+            <thead>
+                <tr>
+                    <th width="6%">क्रम सं. / S.No.</th>
+                    <th>मांग की गई सेवाओं का विवरण / Details of the Services Required</th>
+                    <th width="10%">✓ Select</th>
+                    <th width="12%">मात्रा / Quantity</th>
+                    <th width="18%">दिनांक और समय / Date & Time</th>
+                    <th width="15%">स्थान / Place</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Service 1 -->
+                <tr class="service-row">
+                    <td class="text-center fw-600">1</td>
+                    <td>
+                        <div class="fw-600">चाय/कॉफी के साथ नाश्ता / कुकीज़</div>
+                        <div class="text-muted small">Tea/Coffee with Snacks/Cookies</div>
+                    </td>
+                    <td class="text-center">
+                        <input class="checkbox-service" type="checkbox" name="service_1" id="s1" onchange="toggleService(1)">
+                    </td>
+                    <td><input type="number" name="qty_1" id="qty1" class="form-control form-control-sm" min="0" value="0" disabled></td>
+                    <td><input type="time" name="time_1" id="time1" class="form-control form-control-sm" disabled></td>
+                    <td><input type="text" name="place_1" class="form-control form-control-sm" placeholder="Venue" disabled id="place1"></td>
+                </tr>
+                <!-- Service 2 -->
+                <tr class="service-row">
+                    <td class="text-center fw-600">2</td>
+                    <td>
+                        <div class="fw-600">चाय/कॉफी/नींबू चाय के साथ नाश्ता/स्नैक्स बॉक्स</div>
+                        <div class="text-muted small">Tea / Coffee / Lemon Tea with Refreshment Box</div>
+                    </td>
+                    <td class="text-center">
+                        <input class="checkbox-service" type="checkbox" name="service_2" id="s2" onchange="toggleService(2)">
+                    </td>
+                    <td><input type="number" name="qty_2" id="qty2" class="form-control form-control-sm" min="0" value="0" disabled></td>
+                    <td><input type="time" name="time_2" id="time2" class="form-control form-control-sm" disabled></td>
+                    <td><input type="text" name="place_2" class="form-control form-control-sm" placeholder="Venue" disabled id="place2"></td>
+                </tr>
+                <!-- Service 3 -->
+                <tr class="service-row">
+                    <td class="text-center fw-600">3</td>
+                    <td>
+                        <div class="fw-600">फलजूस / शीत पेय / नारियल पानी/नींबू पानी आदि</div>
+                        <div class="text-muted small">Fruit Juice / Cold Drink / Coconut Water / Lemon Water etc.</div>
+                    </td>
+                    <td class="text-center">
+                        <input class="checkbox-service" type="checkbox" name="service_3" id="s3" onchange="toggleService(3)">
+                    </td>
+                    <td><input type="number" name="qty_3" id="qty3" class="form-control form-control-sm" min="0" value="0" disabled></td>
+                    <td><input type="time" name="time_3" id="time3" class="form-control form-control-sm" disabled></td>
+                    <td><input type="text" name="place_3" class="form-control form-control-sm" placeholder="Venue" disabled id="place3"></td>
+                </tr>
+                <!-- Service 4 -->
+                <tr class="service-row">
+                    <td class="text-center fw-600">4</td>
+                    <td>
+                        <div class="fw-600">सामान्य / नियमित / विशेष / कार्यकारी भोजन</div>
+                        <div class="text-muted small">Working / Regular / Special / Executive Lunch</div>
+                        <div class="mt-1">
+                            <select name="service_type_4" id="s4type" class="form-select form-select-sm" onchange="toggleService4()" style="max-width:240px;">
+                                <option value="none">-- Select Lunch Type --</option>
+                                <option value="working">Working Lunch @ ₹90/-</option>
+                                <option value="regular">Regular Lunch @ ₹150/-</option>
+                                <option value="special">Special Lunch @ ₹200/-</option>
+                                <option value="executive">Executive Lunch @ ₹275/-</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td class="text-center">—</td>
+                    <td><input type="number" name="qty_4" id="qty4" class="form-control form-control-sm" min="0" value="0" disabled></td>
+                    <td><input type="time" name="time_4" id="time4" class="form-control form-control-sm" disabled></td>
+                    <td><input type="text" name="place_4" class="form-control form-control-sm" placeholder="Venue" disabled id="place4"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Special Instructions -->
+        <table class="indent-table">
+            <tr>
+                <td>
+                    <label class="form-label">विशेष निर्देश / Special Instructions</label>
+                    <textarea name="special_instructions" class="form-control" rows="3" placeholder="Any dietary requirements, special arrangements, etc."></textarea>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Signature Row -->
+        <table class="indent-table">
+            <tr>
+                <td width="33%" style="height:90px; vertical-align:top;">
+                    <div class="fw-600 small text-navy">मांगकर्ता के हस्ताक्षर</div>
+                    <div class="small text-muted">Name, designation & Signature of Indentor With STAMP</div>
+                    <div class="mt-2 small">
+                        <strong>{{ current_user.name }}</strong><br>
+                        {{ current_user.designation or '' }}<br>
+                        {{ current_user.department.name if current_user.department else '' }}
+                    </div>
+                </td>
+                <td width="33%" style="height:90px; vertical-align:top;">
+                    <div class="fw-600 small text-navy">प्रमुख के हस्ताक्षर</div>
+                    <div class="small text-muted">Name, designation & Signature of HoD With STAMP</div>
+                    <div class="mt-2 small text-muted fst-italic">Awaiting HOD Approval</div>
+                </td>
+                <td width="34%" style="height:90px; vertical-align:top;">
+                    <div class="fw-600 small text-navy">Chairman / Manager GH & Canteen</div>
+                    <div class="small text-muted">With STAMP</div>
+                    <div class="mt-2 small text-muted fst-italic">Awaiting Final Approval</div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Submit -->
+        <div class="p-3 d-flex gap-2 justify-content-end" style="background:#f8f9fa;border-top:2px solid var(--navy);">
+            <a href="{{ url_for('indentor.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn btn-navy"><i class="bi bi-send-fill me-2"></i>Submit Indent Request</button>
+        </div>
+    </form>
+</div>
+
+<script>
+function toggleService(n) {
+    const checked = document.getElementById('s'+n).checked;
+    document.getElementById('qty'+n).disabled = !checked;
+    document.getElementById('time'+n).disabled = !checked;
+    document.getElementById('place'+n).disabled = !checked;
+    if(checked) document.getElementById('qty'+n).value = document.getElementById('qty'+n).value || 1;
+}
+function toggleService4() {
+    const val = document.getElementById('s4type').value;
+    const active = val !== 'none';
+    document.getElementById('qty4').disabled = !active;
+    document.getElementById('time4').disabled = !active;
+    document.getElementById('place4').disabled = !active;
+}
+</script>
+{% endblock %}

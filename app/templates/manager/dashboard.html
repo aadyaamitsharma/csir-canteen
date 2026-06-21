@@ -1,0 +1,48 @@
+{% extends 'shared/base.html' %}
+{% block title %}Manager Dashboard{% endblock %}
+{% block page_title %}Manager — Service Management{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card"><div class="stat-icon navy"><i class="bi bi-file-earmark-text"></i></div><div><div class="stat-value">{{ stats.total }}</div><div class="stat-label">Total</div></div></div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card"><div class="stat-icon warning"><i class="bi bi-inbox"></i></div><div><div class="stat-value">{{ stats.pending }}</div><div class="stat-label">New Orders</div></div></div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card"><div class="stat-icon info"><i class="bi bi-clock-history"></i></div><div><div class="stat-value">{{ stats.in_progress }}</div><div class="stat-label">In Progress</div></div></div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card"><div class="stat-icon success"><i class="bi bi-check2-all"></i></div><div><div class="stat-value">{{ stats.completed }}</div><div class="stat-label">Completed</div></div></div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><h6 class="card-title">Approved Service Orders</h6></div>
+    <div class="card-body p-0">
+        <table class="table mb-0">
+            <thead><tr><th>Indent No.</th><th>Indentor</th><th>Dept.</th><th>Event Date</th><th>Venue</th><th>Persons</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+            {% for r in requests %}
+            {% set label, color = r.get_status_display() %}
+            <tr>
+                <td class="fw-600 text-navy">{{ r.indent_number }}</td>
+                <td>{{ r.indentor.name }}</td>
+                <td>{{ r.department.name }}</td>
+                <td>{{ r.event_date.strftime('%d %b %Y') }}</td>
+                <td>{{ r.venue }}</td>
+                <td>{{ r.number_of_persons }}</td>
+                <td><span class="badge bg-{{ color }} badge-status">{{ label }}</span></td>
+                <td><a href="{{ url_for('manager.manage_request', id=r.id) }}" class="btn btn-sm btn-navy">Manage</a>
+                <a href="{{ url_for('print_bp.print_indent', id=r.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary" title="Print">🖨️</a></td>
+            </tr>
+            {% endfor %}
+            {% if not requests %}
+            <tr><td colspan="8" class="text-center py-4 text-muted">No approved requests yet.</td></tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

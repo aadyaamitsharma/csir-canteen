@@ -1,0 +1,65 @@
+{% extends 'shared/base.html' %}
+{% block title %}Login — CSIR-CRRI Canteen{% endblock %}
+
+{% block auth_content %}
+<div class="login-page">
+    <div class="login-brand-panel">
+        <div class="login-brand-logo"><i class="bi bi-building-fill-check"></i></div>
+        <div class="login-brand-title">CSIR-CRRI</div>
+        <div class="login-brand-sub">Guest House & Canteen Management System</div>
+        <div class="login-feature"><i class="bi bi-check-circle-fill"></i> Multi-stage Approval Workflow</div>
+        <div class="login-feature"><i class="bi bi-check-circle-fill"></i> Real-time Status Tracking</div>
+        <div class="login-feature"><i class="bi bi-check-circle-fill"></i> Role-based Dashboards</div>
+        <div class="login-feature"><i class="bi bi-check-circle-fill"></i> Service Rating System</div>
+        <div class="login-feature"><i class="bi bi-check-circle-fill"></i> Analytics & Reports</div>
+        <div class="mt-4 text-center" style="opacity:0.4; font-size:0.75rem;">
+            Delhi–Mathura Road, New Delhi–110025
+        </div>
+    </div>
+    <div class="login-form-panel">
+        <div class="login-card">
+            <h3>Welcome Back</h3>
+            <p style="color:#9ca3af; margin-bottom:28px; font-size:0.9rem;">Sign in to your account</p>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}{% for cat, msg in messages %}
+            <div class="alert alert-{{ cat }} mb-3">{{ msg }}</div>
+            {% endfor %}{% endif %}
+            {% endwith %}
+            <div class="mb-3">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" form="loginForm" class="form-control" placeholder="your@email.com" required autofocus>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <input type="password" name="password" id="pwdField" form="loginForm" class="form-control" placeholder="••••••••" required>
+                    <button type="button" class="btn btn-outline-secondary" onclick="togglePwd()"><i class="bi bi-eye" id="eyeIcon"></i></button>
+                </div>
+            </div>
+            <form id="loginForm" method="POST" action="{{ url_for('auth.login') }}">
+                <button type="submit" class="btn btn-navy w-100" style="padding:12px;">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </button>
+            </form>
+            <div class="mt-4 p-3 rounded-12" style="background:#f0f4ff; font-size:0.78rem;">
+                <div class="fw-600 text-navy mb-2"><i class="bi bi-info-circle me-1"></i>Demo Accounts</div>
+                <div class="d-flex flex-column gap-1">
+                    <span>indentor@csir.in / csir@1234</span>
+                    <span>hod@csir.in / csir@1234</span>
+                    <span>chairman@csir.in / csir@1234</span>
+                    <span>manager@csir.in / csir@1234</span>
+                    <span>admin@csir.in / csir@1234</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function togglePwd() {
+    const f = document.getElementById('pwdField');
+    const e = document.getElementById('eyeIcon');
+    if(f.type === 'password') { f.type = 'text'; e.className = 'bi bi-eye-slash'; }
+    else { f.type = 'password'; e.className = 'bi bi-eye'; }
+}
+</script>
+{% endblock %}

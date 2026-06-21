@@ -1,0 +1,87 @@
+{% extends 'shared/base.html' %}
+{% block title %}Manage Request{% endblock %}
+{% block page_title %}Manage Service Request{% endblock %}
+
+{% block content %}
+{% set label, color = indent.get_status_display() %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="card-title">{{ indent.indent_number }}</h6>
+                <span class="badge bg-{{ color }}">{{ label }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label">Indentor</label><p class="fw-600">{{ indent.indentor.name }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Department</label><p class="fw-600">{{ indent.department.name }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Event Type</label><p class="fw-600">{{ indent.event_type | capitalize }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Event Date</label><p class="fw-600">{{ indent.event_date.strftime('%d %b %Y') }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Time</label><p class="fw-600">{{ indent.event_time.strftime('%I:%M %p') }}</p></div>
+                    <div class="col-md-4"><label class="form-label">Venue</label><p class="fw-600">{{ indent.venue }}</p></div>
+                    <div class="col-md-4"><label class="form-label">No. of Persons</label><p class="fw-600">{{ indent.number_of_persons }}</p></div>
+                    <div class="col-12"><label class="form-label">Special Instructions</label><p>{{ indent.special_instructions or '—' }}</p></div>
+                </div>
+                <hr>
+                <h6 class="text-navy mb-3">Services to Deliver</h6>
+                <ul class="list-group list-group-flush">
+                {% if indent.service_type_1 %}<li class="list-group-item d-flex justify-content-between"><span>☕ Tea/Coffee with Snacks</span><span class="badge bg-secondary">Qty: {{ indent.service_quantity_1 }}</span></li>{% endif %}
+                {% if indent.service_type_2 %}<li class="list-group-item d-flex justify-content-between"><span>🫖 Tea/Coffee with Refreshment Box</span><span class="badge bg-secondary">Qty: {{ indent.service_quantity_2 }}</span></li>{% endif %}
+                {% if indent.service_type_3 %}<li class="list-group-item d-flex justify-content-between"><span>🥤 Fruit Juice/Cold Drink</span><span class="badge bg-secondary">Qty: {{ indent.service_quantity_3 }}</span></li>{% endif %}
+                {% if indent.service_type_4 != 'none' %}<li class="list-group-item d-flex justify-content-between"><span>🍱 {{ indent.service_type_4 | capitalize }} Lunch @ ₹{{ indent.get_lunch_price() }}/-</span><span class="badge bg-secondary">Qty: {{ indent.service_quantity_4 }}</span></li>{% endif %}
+                </ul>
+            </div>
+        </div>
+
+        {% if indent.status in ['chairman_approved', 'in_progress'] %}
+        <div class="card">
+            <div class="card-header"><h6 class="card-title">Update Service Status</h6></div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Remarks</label>
+                    <textarea id="remarks" class="form-control" rows="2" placeholder="Add notes..."></textarea>
+                </div>
+                <div class="d-flex gap-3">
+                    {% if indent.status == 'chairman_approved' %}
+                    <form method="POST" class="flex-fill">
+                        <input type="hidden" name="action" value="in_progress">
+                        <input type="hidden" name="remarks" id="remarksIP">
+                        <button type="submit" class="btn btn-warning w-100 text-dark" onclick="document.getElementById('remarksIP').value=document.getElementById('remarks').value">
+                            <i class="bi bi-clock-history me-2"></i>Mark In Progress
+                        </button>
+                    </form>
+                    {% endif %}
+                    <form method="POST" class="flex-fill">
+                        <input type="hidden" name="action" value="completed">
+                        <input type="hidden" name="remarks" id="remarksC">
+                        <button type="submit" class="btn btn-success w-100" onclick="document.getElementById('remarksC').value=document.getElementById('remarks').value">
+                            <i class="bi bi-check2-circle me-2"></i>Mark Completed
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><h6 class="card-title">Approval History</h6></div>
+            <div class="card-body">
+                <div class="timeline">
+                <div class="timeline-item approved"><div class="fw-600 small">Submitted</div><div class="text-muted" style="font-size:0.78rem;">{{ indent.created_at.strftime('%d %b %Y') }}</div></div>
+                {% for log in logs %}
+                <div class="timeline-item {{ log.action }}">
+                    <div class="fw-600 small">{{ log.role|capitalize }}: {{ log.action|capitalize }}</div>
+                    <div class="text-muted" style="font-size:0.78rem;">{{ log.timestamp.strftime('%d %b %Y, %I:%M %p') }}</div>
+                    {% if log.remarks %}<div class="small fst-italic">"{{ log.remarks }}"</div>{% endif %}
+                </div>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="mt-3"><a href="{{ url_for('manager.dashboard') }}" class="btn btn-outline-secondary w-100">← Back</a>
+        <a href="{{ url_for('print_bp.print_indent', id=indent.id) }}" target="_blank" class="btn btn-outline-dark w-100 mt-2">🖨️ Print / Download as PDF</a></div>
+    </div>
+</div>
+{% endblock %}

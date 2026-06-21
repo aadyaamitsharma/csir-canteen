@@ -1,0 +1,93 @@
+{% extends 'shared/base.html' %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}All Requests — Reports{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title">All Indent Requests ({{ requests|length }})</h6>
+        <div class="d-flex gap-2">
+            <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Search..." style="max-width:200px;">
+            <select id="statusFilter" class="form-select form-select-sm" style="max-width:160px;">
+                <option value="">All Statuses</option>
+                <option value="pending_hod">Pending HOD</option>
+                <option value="hod_approved">HOD Approved</option>
+                <option value="hod_rejected">HOD Rejected</option>
+                <option value="chairman_approved">Chairman Approved</option>
+                <option value="chairman_rejected">Chairman Rejected</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+            </select>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table mb-0" id="reportsTable">
+                <thead>
+                    <tr>
+                        <th>Indent No.</th>
+                        <th>Indentor</th>
+                        <th>Department</th>
+                        <th>Event Type</th>
+                        <th>Venue</th>
+                        <th>Event Date</th>
+                        <th>Persons</th>
+                        <th>Status</th>
+                        <th>Rating</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for r in requests %}
+                {% set label, color = r.get_status_display() %}
+                <tr data-status="{{ r.status }}">
+                    <td class="fw-600 text-navy">{{ r.indent_number }}</td>
+                    <td>{{ r.indentor.name }}</td>
+                    <td>{{ r.department.name }}</td>
+                    <td>{{ r.event_type | capitalize }}</td>
+                    <td>{{ r.venue }}</td>
+                    <td>{{ r.event_date.strftime('%d %b %Y') }}</td>
+                    <td>{{ r.number_of_persons }}</td>
+                    <td><span class="badge bg-{{ color }} badge-status">{{ label }}</span></td>
+                    <td>
+                        {% if r.rating %}
+                        <span class="text-gold fw-600">{{ r.rating.overall }}/5 ⭐</span>
+                        {% else %}
+                        <span class="text-muted small">—</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ r.created_at.strftime('%d %b %Y') }}</td>
+                </tr>
+                {% endfor %}
+                {% if not requests %}
+                <tr><td colspan="10" class="text-center py-5 text-muted">No requests found.</td></tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const searchInput = document.getElementById('searchInput');
+const statusFilter = document.getElementById('statusFilter');
+const rows = document.querySelectorAll('#reportsTable tbody tr[data-status]');
+
+function filterTable() {
+    const q = searchInput.value.toLowerCase();
+    const status = statusFilter.value;
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const rowStatus = row.dataset.status;
+        const matchText = !q || text.includes(q);
+        const matchStatus = !status || rowStatus === status;
+        row.style.display = (matchText && matchStatus) ? '' : 'none';
+    });
+}
+
+searchInput.addEventListener('input', filterTable);
+statusFilter.addEventListener('change', filterTable);
+</script>
+{% endblock %}
